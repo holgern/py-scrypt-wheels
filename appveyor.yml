@@ -6,6 +6,7 @@ environment:
     # /E:ON and /V:ON options are not enabled in the batch script intepreter
     # See: http://stackoverflow.com/a/13751649/163740
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
+    BUILD_COMMIT: v0.8.2
 
   matrix:
     - PYTHON: "C:\\Python27"
@@ -74,11 +75,9 @@ install:
   - "pip install --disable-pip-version-check --user --upgrade pip"
 
 build_script:
-  - cd
   - cd py-scrypt
-  - cd
   - git fetch origin
-  - cd
+  - git checkout %BUILD_COMMIT%
   - "%CMD_IN_ENV% python setup.py build"
 
 test_script:

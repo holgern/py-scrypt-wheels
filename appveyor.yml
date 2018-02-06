@@ -77,7 +77,7 @@ install:
 build_script:
   - cd py-scrypt
   - git fetch origin
-  - git checkout %BUILD_COMMIT%
+  - git checkout
   - "%CMD_IN_ENV% python setup.py build"
 
 test_script:

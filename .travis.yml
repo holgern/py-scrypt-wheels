@@ -16,7 +16,7 @@ addons:
   apt:
     packages:
       - openssl
-      - openssl-devel
+      - libssl-dev
 
 matrix:
   exclude:

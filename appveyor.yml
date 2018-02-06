@@ -89,7 +89,7 @@ build_script:
 
 test_script:
   # Run some tests
-  - cd py-scrypt
+  - cd scrypt
   - python setup.py tests
   - cd ..
 

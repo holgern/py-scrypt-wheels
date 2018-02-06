@@ -74,8 +74,11 @@ install:
   - "pip install --disable-pip-version-check --user --upgrade pip"
 
 build_script:
+  - cd
   - cd py-scrypt
+  - cd
   - git fetch origin
+  - cd
   - "%CMD_IN_ENV% python setup.py build"
 
 test_script:

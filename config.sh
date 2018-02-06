@@ -15,7 +15,7 @@ function build_linux_wheel {
 
     # Add workaround for auditwheel bug:
     # https://github.com/pypa/auditwheel/issues/29
-    export CFLAGS="$CFLAGS"
+    export CFLAGS="$CFLAGS -I/usr/include -I/usr/local/include"
     build_bdist_wheel $@
 }
 

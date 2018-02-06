@@ -4,6 +4,11 @@ env:
       - BUILD_COMMIT=v0.8.2
       - PLAT=x86_64
       - UNICODE_WIDTH=32
+      - BUILD_DEPENDS=
+      - TEST_DEPENDS=
+      - NP_BUILD_DEP=1.7.1
+      - NP_TEST_DEP=1.11.0
+      - MANYLINUX_URL=https://nipy.bic.berkeley.edu/manylinux
 
 language: python
 # Default Python version is usually 2.7

@@ -75,12 +75,12 @@ install:
   - "pip install --disable-pip-version-check --user --upgrade pip"
 
 build_script:
-  - ps: "ls py-scrypt"
+  - ps: "ls \"py-scrypt\""
   - cd %APPVEYOR_BUILD_FOLDER%\py-scrypt
-  - ls
+  - ps: "ls \".\""
   - git fetch origin
   - git checkout
-  - ls
+  - ps: "ls \".\""
   - "%CMD_IN_ENV% python setup.py build"
 
 test_script:

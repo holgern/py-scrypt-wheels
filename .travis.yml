@@ -71,8 +71,8 @@ matrix:
         - MB_PYTHON_VERSION=3.6
 
 before_install:
-    - BUILD_DEPENDS="openssl"
-    - TEST_DEPENDS="openssl"
+    - BUILD_DEPENDS=""
+    - TEST_DEPENDS=""
     - source multibuild/common_utils.sh
     - source multibuild/travis_steps.sh
     - before_install

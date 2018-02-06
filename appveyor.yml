@@ -90,7 +90,7 @@ build_script:
 test_script:
   # Run some tests
   - cd C:\\projects\\py-scrypt-wheels\\py-scrypt
-  - python setup.py tests
+  - python setup.py test
   - cd ..
 
 after_test:

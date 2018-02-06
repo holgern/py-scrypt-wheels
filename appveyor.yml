@@ -1,104 +1,109 @@
-# Based on https://github.com/ogrisel/python-appveyor-demo/blob/master/appveyor.yml
+# vim ft=yaml
+# CI on Windows via appveyor
+# Largely from:
+# https://github.com/ogrisel/python-appveyor-demo/blob/master/appveyor.yml
+#
+# Builds version specified in BUILD_COMMIT variable
+# To chose version to build, edit value of BUILD_COMMIT
+
+os: Visual Studio 2015
 
 environment:
-  global:
-    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
-    # /E:ON and /V:ON options are not enabled in the batch script intepreter
-    # See: http://stackoverflow.com/a/13751649/163740
-    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
-    BUILD_COMMIT: v0.8.2
+    global:
+      # Remember to edit .travis.yml too
+      BUILD_COMMIT: v0.8.2
+      NP_BUILD_DEP: "1.10.4"
+      NP_TEST_DEP: "1.10.4"
 
-  matrix:
+    matrix:
+
     - PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7.12"
+      PYTHON_VERSION: "2.7.x" # currently 2.7.11
       PYTHON_ARCH: "32"
 
     - PYTHON: "C:\\Python27-x64"
-      PYTHON_VERSION: "2.7.12"
+      PYTHON_VERSION: "2.7.x" # currently 2.7.11
       PYTHON_ARCH: "64"
 
     - PYTHON: "C:\\Python34"
-      PYTHON_VERSION: "3.4.4"
+      PYTHON_VERSION: "3.4.x" # currently 3.4.3
       PYTHON_ARCH: "32"
 
     - PYTHON: "C:\\Python34-x64"
-      PYTHON_VERSION: "3.4.4"
+      PYTHON_VERSION: "3.4.x" # currently 3.4.3
       PYTHON_ARCH: "64"
 
     - PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5.2"
+      PYTHON_VERSION: "3.5.x" # currently 3.5.1
       PYTHON_ARCH: "32"
 
     - PYTHON: "C:\\Python35-x64"
-      PYTHON_VERSION: "3.5.2"
+      PYTHON_VERSION: "3.5.x" # currently 3.5.1
       PYTHON_ARCH: "64"
 
     - PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6.3"
+      PYTHON_VERSION: "3.6.x" # currently 3.6.0
       PYTHON_ARCH: "32"
+      NP_BUILD_DEP: "1.11.3"
+      NP_TEST_DEP: "1.11.3"
 
     - PYTHON: "C:\\Python36-x64"
-      PYTHON_VERSION: "3.6.3"
+      PYTHON_VERSION: "3.6.x" # currently 3.6.0
       PYTHON_ARCH: "64"
+      NP_BUILD_DEP: "1.11.3"
+      NP_TEST_DEP: "1.11.3"
 
 install:
-  # If there is a newer build queued for the same PR, cancel this one.
-  # The AppVeyor 'rollout builds' option is supposed to serve the same
-  # purpose but it is problematic because it tends to cancel builds pushed
-  # directly to master instead of just PR builds (or the converse).
-  # credits: JuliaLang developers.
-  - ps: if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
-        https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
-        Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
-          throw "There are newer queued builds for this pull request, failing early." }
-  - ECHO "Filesystem root:"
-  - ps: "ls \"C:/\""
-
-  - ECHO "Installed SDKs:"
-  - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
-
-  # Install Python (from the official .msi of http://python.org) and pip when
-  # not already installed.
-  - ps: if (-not(Test-Path($env:PYTHON))) { & appveyor\install.ps1 }
+  - cmd: echo "Using cmd"
 
   # Prepend newly installed Python to the PATH of this build (this cannot be
   # done from inside the powershell script as it would require to restart
   # the parent CMD process).
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+
+  # Fix MSVC builds for 64-bit Python
+  # See
+  # http://stackoverflow.com/questions/32091593/cannot-install-windows-sdk-7-1-on-windows-10
+  - echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64/vcvars64.bat"
 
   # Check that we have the expected version and architecture for Python
-  - "python --version"
-  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - python --version
+  - python -c "import struct; print(struct.calcsize('P') * 8)"
 
-  # Upgrade to the latest version of pip to avoid it displaying warnings
-  # about it being out of date.
-  - "pip install --disable-pip-version-check --user --upgrade pip"
+  - python -m pip install --upgrade pip
+  # Pin wheel to 0.26 to avoid Windows ABI tag for built wheel
+  - pip install wheel==0.26
+  - git submodule update --init
+  # Dependencies for package
+  - pip install numpy==%NP_BUILD_DEP% Cython
 
 build_script:
-  - ps: "ls \"py-scrypt\""
-  - cd %APPVEYOR_BUILD_FOLDER%\py-scrypt
-  - ps: "ls \".\""
+  # Build and install the wheel
+  - cd py-scrypt
   - git fetch origin
-  - git checkout
-  - ps: "ls \".\""
-  - "%CMD_IN_ENV% python setup.py build"
+  - git checkout %BUILD_COMMIT%
+  - python setup.py bdist_wheel
+  - cd dist
+  - pip install --pre --no-index -f . scrypt
+  - cd ..
 
 test_script:
-  - cd %APPVEYOR_BUILD_FOLDER%\py-scrypt
-  - "%CMD_IN_ENV% python setup.py test"
+  # Run some tests
+  - mkdir tmp
+  - cd tmp
+  - pip install numpy==%NP_TEST_DEP% nose
+  - cd py-scrypt
+  - python setup.py tests
+  - cd ..
 
 after_test:
   # If tests are successful, create binary packages for the project.
-  - cd %APPVEYOR_BUILD_FOLDER%\py-scrypt
-  - "%CMD_IN_ENV% pip install wheel"
-  - "%CMD_IN_ENV% python setup.py bdist_wheel"
-  - "%CMD_IN_ENV% python setup.py bdist_wininst"
-  - "%CMD_IN_ENV% python setup.py bdist_msi"
-  - ps: "ls dist"
+  - dir dist
 
 artifacts:
   # Archive the generated packages in the ci.appveyor.com build report.
-  - path: dist\*
+  - path: py-scrypt\dist\*
+
 
 deploy:
   description: 'wheel from appveyor'

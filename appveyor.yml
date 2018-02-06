@@ -95,7 +95,12 @@ test_script:
 
 after_test:
   # If tests are successful, create binary packages for the project.
-  - dir dist
+    # If tests are successful, create binary packages for the project.
+  - cd C:\\projects\\py-scrypt-wheels\\py-scrypt
+  - python setup.py bdist_wheel"
+  - python setup.py bdist_wininst"
+  - python setup.py bdist_msi"
+  - ps: "ls dist"
 
 artifacts:
   # Archive the generated packages in the ci.appveyor.com build report.

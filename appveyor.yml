@@ -75,26 +75,21 @@ install:
   - "pip install --disable-pip-version-check --user --upgrade pip"
 
 build_script:
-  - ps: cd py-scrypt
-  - ps: cd
-  - ps: ls
-  - ps: git fetch origin
-  - ps: git checkout
-  - ps: ls
+  - ps: "ls py-scrypt"
+  - cd %APPVEYOR_BUILD_FOLDER%\py-scrypt
+  - ls
+  - git fetch origin
+  - git checkout
+  - ls
   - "%CMD_IN_ENV% python setup.py build"
 
 test_script:
-  - ps: cd py-scrypt
-  - ps: cd
-  - ps: ls
-  - ps: git fetch origin
-  - ps: git checkout
-  - ps: ls
+  - cd %APPVEYOR_BUILD_FOLDER%\py-scrypt
   - "%CMD_IN_ENV% python setup.py test"
 
 after_test:
   # If tests are successful, create binary packages for the project.
-  - ps: cd py-scrypt
+  - cd %APPVEYOR_BUILD_FOLDER%\py-scrypt
   - "%CMD_IN_ENV% pip install wheel"
   - "%CMD_IN_ENV% python setup.py bdist_wheel"
   - "%CMD_IN_ENV% python setup.py bdist_wininst"

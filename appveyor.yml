@@ -74,14 +74,12 @@ install:
   - "pip install --disable-pip-version-check --user --upgrade pip"
 
 build_script:
-  - "%CMD_IN_ENV% cd py-scrypt"
-  - "%CMD_IN_ENV% git fetch origin"
-  - "%CMD_IN_ENV% python setup.py build"
+  - "%CMD_IN_ENV% cd py-scrypt && git fetch origin"
+  - "%CMD_IN_ENV% cd py-scrypt && python setup.py build"
 
 test_script:
-  - "%CMD_IN_ENV% cd py-scrypt"
-  - "%CMD_IN_ENV% git fetch origin"
-  - "%CMD_IN_ENV% python setup.py test"
+  - "%CMD_IN_ENV% cd py-scrypt && git fetch origin"
+  - "%CMD_IN_ENV% cd py-scrypt && python setup.py test"
 
 after_test:
   # If tests are successful, create binary packages for the project.

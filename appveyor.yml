@@ -74,12 +74,14 @@ install:
   - "pip install --disable-pip-version-check --user --upgrade pip"
 
 build_script:
-  # Build the compiled extension
-  - "%CMD_IN_ENV% cd py-scrypt && python setup.py build"
+  - cd py-scrypt
+  - git fetch origin
+  - "%CMD_IN_ENV% python setup.py build"
 
 test_script:
-  # Run the project tests
-  - "%CMD_IN_ENV% cd py-scrypt && python setup.py test"
+  - cd py-scrypt
+  - git fetch origin
+  - "%CMD_IN_ENV% python setup.py test"
 
 after_test:
   # If tests are successful, create binary packages for the project.
